@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Chatroom</title>
+</head>
+<body>
+    <h2>Create a New Chatroom</h2>
+    <form action="{{ url_for('chat_management.create_room') }}" method="post">
+        <input type="text" name="room_name" placeholder="Chatroom Name" required>
+        <label>
+            <input type="checkbox" name="is_invitation_only"> Invitation Only
+        </label>
+        <button type="submit">Create Chatroom</button>
+    </form>
+    <a href="{{ url_for('chat_management.list_chatrooms') }}" class="btn">Chat rooms</a>
+</body>
+</html>

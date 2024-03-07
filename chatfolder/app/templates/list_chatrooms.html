@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatrooms</title>
+</head>
+<body>
+    <h2>Available Chatrooms</h2>
+    <ul>
+        {% for chatroom in chatrooms %}
+        <li>
+            <a href="{{ url_for('chat_management.chatroom', chatroom_id=chatroom.id) }}">{{ chatroom.name }}</a>
+            <!-- Форма запрошення для власників чату -->
+            {% if chatroom.owner_id == current_user.id %}
+            <form action="{{ url_for('chat_management.invite_to_chatroom') }}" method="post" style="display: inline;">
+                <input type="hidden" name="chatroom_id" value="{{ chatroom.id }}">
+                <input type="text" name="invitee_username" placeholder="Enter username to invite">
+                <button type="submit">Send Invitation</button>
+            </form>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('chat_management.create_room_form') }}" class="btn">Create New Chat</a>
+
+    <!-- Запрошення, що очікують на розгляд -->
+    <h2>Pending Invitations</h2>
+    <ul>
+        {% for invitation in pending_invitations %}
+        <li>
+            {{ invitation.chatroom.name }} - Invited by {{ invitation.inviter.username }}
+            <form action="{{ url_for('chat_management.respond_to_invitation', invitation_id=invitation.id, response='accept') }}" method="post" style="display: inline;">
+                <button type="submit">Accept</button>
+            </form>
+            <form action="{{ url_for('chat_management.respond_to_invitation', invitation_id=invitation.id, response='decline') }}" method="post" style="display: inline;">
+                <button type="submit">Decline</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

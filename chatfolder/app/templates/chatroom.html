@@ -1,0 +1,71 @@
+<!-- chatroom -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room - {{ room.name }}</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .timestamp { color: #999; margin-left: 10px; font-size: 0.8em; }
+        #messages div { margin-bottom: 10px; }
+        .alert { padding: 20px; background-color: #f44336; color: white; margin-bottom: 15px; }
+        .info { background-color: #2196F3; } 
+        .success { background-color: #4CAF50; } 
+    </style>
+</head>
+<body>
+    <div id="chatroom">
+        <h2>{{ room.name }}</h2>
+        {% if user_invitation_status == 'not_invited' %}
+        <div class="alert">
+            This chatroom is invitation-only. If you believe this is an error, please contact the chatroom owner.
+        </div>
+        {% elif user_invitation_status == 'pending' %}
+        <div class="alert info">
+            You have been invited to this chatroom. Please <a href="{{ url_for('chat_management.accept_invitation', invitation_id=your_invitation_id_here) }}" style="color: yellow;">accept your invitation</a> to participate in the chat.
+        </div>
+        {% else %}
+        <div id="messages">
+            {% for message in messages %}
+            <div>
+                <span style="color: {{ session['color'] }}">{{ message.user.username }}:</span>
+                <span>{{ message.body }}</span>
+                <span class="timestamp">{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <form id="send-message">
+            <input type="text" id="message" autocomplete="off" placeholder="Type your message here..." />
+            <button type="submit">Send</button>
+        </form>
+        {% endif %}
+    </div>
+    <script>
+        // Ініціалізація клієнта Socket.IO
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var chatroomId = "{{ room.id }}";
+        
+        socket.on('connect', function() {
+            socket.emit('join', {username: "{{ current_user.username }}", chatroom_id: chatroomId});
+        });
+
+        socket.on('user_left', function(data) {
+            $('#messages').append($('<div class="user-left">').text(data.username + ' has left the chat.'));
+        });
+
+        $('#send-message').on('submit', function(event) {
+            event.preventDefault();
+            let message = $('#message').val();
+            socket.emit('send_message', {message: message, username: "{{ current_user.username }}", chatroom_id: chatroomId});
+            $('#message').val('');
+        });
+
+        socket.on('receive_message', function(data) {
+            $('#messages').append(
+                $('<div/>').html('<span style="color: ' + data.color + '">' + data.username + ':</span> <span>' + data.message + '</span><span class="timestamp">' + data.timestamp + '</span>')
+            );
+        });
+    </script>
+</body>
+</html>

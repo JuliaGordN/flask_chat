@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invitations</title>
+</head>
+<body>
+    <h1>Your Invitations</h1>
+    {% for invitation in invitations %}
+        <div>
+            <p>Invitation to join {{ invitation.chatroom.name }} from {{ invitation.inviter.username }}</p>
+            <a href="{{ url_for('accept_invitation', invitation_id=invitation.id) }}">Accept</a>
+            <a href="{{ url_for('decline_invitation', invitation_id=invitation.id) }}">Decline</a>
+        </div>
+    {% endfor %}
+</body>
+</html>
